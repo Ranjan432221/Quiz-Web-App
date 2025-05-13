@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Programming Languages Quiz</title>
+  <style>
+    body {
+      /* background: #121212; */
+      background: #1e1e1e;
+      /* color: #eee; */
+      color: #1e1e1e;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 1rem;
+      color: #4ade80;
+
+    }
+
+    #quiz-container {
+      /* max-width: 350px; */
+      max-height: 650px;
+      margin: 0 auto;
+      padding: 1rem;
+      /* background: #1e1e1e; */
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(74, 222, 128, 0.6);
+      overflow-y: auto;
+      /* background: #eee; */
+    }
+    .change{
+      background: #eee;
+      border-radius: 10px;
+    }
+
+    .dark-mode {
+      background: #1e1e1e;
+      color: white;
+      
+    }
+
+    #language-selection {
+      text-align: center;
+    }
+
+    .question-block {
+      margin-bottom: 1.5rem;
+    }
+
+    /* .question-text {
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      color: #060606;
+    } */
+
+    .question-text{
+      font-weight: 500;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 0.5rem;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    .custom-radio {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #4ade80;
+      border-radius: 50%;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4ade80;
+      font-weight: bold;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    input[type="radio"]:checked+.custom-radio {
+      background-color: #4ade80;
+      color: black;
+    }
+
+    .option.correct {
+      background-color: #22c55e;
+    }
+
+    .option.incorrect {
+      background-color: #dc2626;
+    }
+
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 1vh;
+      width: 100%;
+      color: white;
+      text-align: center;
+    }
+
+    button {
+      background-color: #4ade80;
+      border: none;
+      color: black;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 0 5px;
+      user-select: none;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #3bbf6d;
+    }
+
+    button:disabled {
+      background-color: #88c999;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="newButton">DarkMode</button>
+  <h1 id="program">Programming Languages Quiz</h1>
+  <div class="change">
+    <div id="quiz-container">
+      <div id="language-selection">
+        <h2 style="color:#4ade80;">Select a Language</h2>
+        <button type="button" onclick="startQuiz('Java')">Java</button>
+        <button type="button" onclick="startQuiz('C')">C</button>
+        <button type="button" onclick="startQuiz('C++')">C++</button>
+        <button type="button" onclick="startQuiz('Python')">Python</button>
+        <!-- <button type="button" onclick="startQuiz('HTML')">HTML</button> -->
+        <!-- <button type="button" onclick="startQuiz('HTML')">HTML</button> -->
+      </div>
+      <form id="quiz" style="display: none;"></form>
+      <div class="footer" style="display: none;">
+        <button type="button" id="submit-btn" disabled><b>SUBMIT</b></button>
+        <button type="button" id="preview-btn" style="display: none;">Preview</button>
+        <button type="button" id="restart-btn" style="display: none;">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const quizContainer = document.getElementById("quiz");
+    const languageSelection = document.getElementById("language-selection");
+    const submitBtn = document.getElementById("submit-btn");
+    const previewBtn = document.getElementById("preview-btn");
+    const restartBtn = document.getElementById("restart-btn");
+    const footer = document.querySelector(".footer");
+
+    let currentQuestions = [];
+    let userAnswers = [];
+    let quizLanguage = "";
+    let previewMode = false;
+    const optionLabels = ['A', 'B', 'C', 'D'];
+
+    const baseQuestionsData = {
+      Java: [
+        { question: "What is the main method in Java?", options: ['main()', 'start()', 'init()', 'run()'], answer: 0 },
+        { question: "Which keyword is used to define a class in Java?", options: ['class', 'def', 'struct', 'function'], answer: 0 },
+        { question: "Which symbol is used to include libraries in Java?", options: ['import', '#include', 'using', 'require'], answer: 0 },
+      ],
+      C: [
+        { question: "Which symbol is used to include libraries in C?", options: ['#include', 'import', 'require', 'using'], answer: 0 },
+        { question: "What is the correct way to declare an integer variable in C?", options: ['int var;', 'integer var;', 'var int;', 'declare int var;'], answer: 0 },
+        { question: "Which function is used to print output in C?", options: ['printf()', 'println()', 'cout', 'print()'], answer: 0 },
+      ],
+      "C++": [
+        { question: "Which symbol is used to include libraries in C++?", options: ['#include', 'import', 'require', 'using'], answer: 0 },
+        { question: "What is the correct syntax to declare a pointer in C++?", options: ['int *ptr;', 'int ptr;', '*int ptr;', 'ptr int;'], answer: 0 },
+        { question: "Which keyword is used to inherit a class in C++?", options: ['public', 'extends', 'inherit', 'super'], answer: 0 },
+      ],
+      Python: [
+        { question: "How do you define a function in Python?", options: ['def', 'function', 'func', 'define'], answer: 0 },
+        { question: "Which of these is a mutable data type in Python?", options: ['list', 'tuple', 'str', 'int'], answer: 0 },
+        { question: "How do you add a comment in Python?", options: ['# comment', '// comment', '/* comment */', '<!-- comment -->'], answer: 0 },
+      ],
+      // HTML: [
+      //   { question: "How do you define a function in Python?", options: ['def', 'function', 'func', 'define'], answer: 0 },
+      //   { question: "Which of these is a mutable data type in Python?", options: ['list', 'tuple', 'str', 'int'], answer: 0 },
+      //   { question: "How do you add a comment in Python?", options: ['# comment', '// comment', '/* comment */', '<!-- comment -->'], answer: 0 },
+      // ],
+    };
+
+    function generateQuestions(language) {
+      const base = baseQuestionsData[language];
+      const questions = [];
+      for (let i = 0; i < 100; i++) {
+        const baseQ = base[i % base.length];
+        questions.push({
+          question: `${baseQ.question} `,
+          options: baseQ.options,
+          answer: baseQ.answer
+        });
+      }
+      shuffle(questions);
+      return questions;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startQuiz(language) {
+      quizLanguage = language;
+      languageSelection.style.display = "none";
+      quizContainer.style.display = "block";
+      footer.style.display = "block";
+      previewMode = false;
+      previewBtn.style.display = "none";
+      restartBtn.style.display = "none";
+      submitBtn.disabled = false;
+
+      currentQuestions = generateQuestions(language);
+      userAnswers = new Array(currentQuestions.length).fill(null);
+      renderQuestions();
+    }
+
+    function renderQuestions() {
+      quizContainer.innerHTML = "";
+      currentQuestions.forEach((q, idx) => {
+        const block = document.createElement("div");
+        block.className = "question-block";
+        const qText = document.createElement("div");
+        qText.className = "question-text";
+        qText.textContent = `Q${idx + 1}. ${q.question}`;
+        block.appendChild(qText);
+
+        q.options.forEach((opt, optIdx) => {
+          const label = document.createElement("label");
+          label.className = "option";
+          label.htmlFor = `q${idx}_opt${optIdx}`;
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `question${idx}`;
+          input.id = `q${idx}_opt${optIdx}`;
+          input.value = optIdx;
+          input.disabled = previewMode;
+          if (userAnswers[idx] === optIdx) input.checked = true;
+
+          input.addEventListener("change", () => {
+            userAnswers[idx] = optIdx;
+          });
+
+          const customRadio = document.createElement("span");
+          customRadio.className = "custom-radio";
+          customRadio.textContent = optionLabels[optIdx];
+
+          const optionText = document.createElement("span");
+          optionText.textContent = opt;
+          optionText.style.flex = "1";
+
+          label.appendChild(input);
+          label.appendChild(customRadio);
+          label.appendChild(optionText);
+
+          if (previewMode) {
+            if (optIdx === q.answer) {
+              label.classList.add("correct");
+            }
+            if (userAnswers[idx] === optIdx && userAnswers[idx] !== q.answer) {
+              label.classList.add("incorrect");
+            }
+            input.disabled = true;
+          }
+
+          block.appendChild(label);
+        });
+
+        quizContainer.appendChild(block);
+      });
+
+      if (previewMode) {
+        submitBtn.style.display = "none";
+        previewBtn.textContent = "Back to Result";
+        previewBtn.style.display = "inline-block";
+        restartBtn.style.display = "inline-block";
+      } else {
+        submitBtn.style.display = "inline-block";
+        previewBtn.style.display = "none";
+        restartBtn.style.display = "none";
+      }
+    }
+
+    function calculateScore() {
+      let score = 0;
+      for (let i = 0; i < currentQuestions.length; i++) {
+        if (userAnswers[i] === currentQuestions[i].answer) score++;
+      }
+      return score;
+    }
+
+    submitBtn.addEventListener("click", () => {
+      const score = calculateScore();
+      quizContainer.innerHTML = `<div style="text-align:center; font-size:1.5rem; margin-bottom:1rem;">You scored <strong>${score} / ${currentQuestions.length}</strong> in ${quizLanguage} quiz.</div>`;
+      submitBtn.style.display = "none";
+      previewBtn.textContent = "Preview";
+      previewBtn.style.display = "inline-block";
+      restartBtn.style.display = "inline-block";
+      previewMode = false;
+    });
+
+    previewBtn.addEventListener("click", () => {
+      previewMode = !previewMode;
+      if (previewMode) {
+        renderQuestions();
+      } else {
+        const score = calculateScore();
+        quizContainer.innerHTML = `<div style="text-align:center; font-size:1.5rem; margin-bottom:1rem;">You scored <strong>${score} / ${currentQuestions.length}</strong> in ${quizLanguage} quiz.</div>`;
+        previewBtn.textContent = "Preview";
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      quizLanguage = "";
+      currentQuestions = [];
+      userAnswers = [];
+      previewMode = false;
+      quizContainer.style.display = "none";
+      footer.style.display = "none";
+      languageSelection.style.display = "block";
+      quizContainer.innerHTML = "";
+      submitBtn.style.display = "inline-block";
+      submitBtn.disabled = false;
+      previewBtn.style.display = "none";
+      restartBtn.style.display = "none";
+    });
+
+    let btn = document.querySelector('#newButton');
+    btn.addEventListener('click', () => {
+      let element = document.querySelector('#quiz-container');
+      element.classList.toggle('dark-mode');
+    });
+  </script>
+</body>
+
+</html>
